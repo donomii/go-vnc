@@ -84,6 +84,7 @@ func NewClientConfig(p string) *ClientConfig {
 			&ClientAuthVNC{p},
 		},
 		Password: p,
+        ServerMessageCh: make(chan ServerMessage, 100),
 		ServerMessages: []ServerMessage{
 			&FramebufferUpdate{},
 			&SetColorMapEntries{},
@@ -221,7 +222,6 @@ func (c *ClientConn) ListenAndHandle() error {
 			break
 		}
 		if c.debug {
-			log.Printf("message-type: %v", messageType)
 		}
 
 		msg, ok := serverMessages[messageType]
