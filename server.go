@@ -37,6 +37,7 @@ type Rectangle struct {
 	X, Y          uint16
 	Width, Height uint16
 	Enc           Encoding
+	BytePix       []byte
 	encodable     EncodableFunc
 }
 
@@ -58,7 +59,7 @@ func (r *Rectangle) Read(c *ClientConn) error {
 	}
 
 	var err error
-	r.Enc, err = enc.Read(c, r)
+	r.Enc, r.BytePix, err = enc.Read(c, r)
 	if err != nil {
 		return fmt.Errorf("error reading rectangle encoding: %v", err)
 	}
@@ -254,32 +255,32 @@ func (c *Color) Marshal() ([]byte, error) {
 }
 
 func (c *Color) Unmarshal(data []byte) error {
-	// TODO(kward): Put back once TestFramebufferUpdate can handle this.
-	// if len(data) == 0 {
-	// 	return NewVNCError(fmt.Sprint("Could not unmarshal empty data slice"))
-	// }
-	order := c.pf.order()
+    // TODO(kward): Put back once TestFramebufferUpdate can handle this.
+    // if len(data) == 0 {
+    // 	return NewVNCError(fmt.Sprint("Could not unmarshal empty data slice"))
+    // }
+    order := c.pf.order()
 
-	var pixel uint32
-	switch c.pf.BPP {
-	case 8:
-		pixel = uint32(data[0])
-	case 16:
-		pixel = uint32(order.Uint16(data))
-	case 32:
-		pixel = order.Uint32(data)
-	}
+    var pixel uint32
+    switch c.pf.BPP {
+    case 8:
+        pixel = uint32(data[0])
+    case 16:
+        pixel = uint32(order.Uint16(data))
+    case 32:
+        pixel = order.Uint32(data)
+    }
 
-	if c.pf.TrueColor == RFBTrue {
-		c.R = uint16((pixel >> c.pf.RedShift) & uint32(c.pf.RedMax))
-		c.G = uint16((pixel >> c.pf.GreenShift) & uint32(c.pf.GreenMax))
-		c.B = uint16((pixel >> c.pf.BlueShift) & uint32(c.pf.BlueMax))
-	} else {
-		*c = c.cm[pixel]
-		c.cmIndex = pixel
-	}
+    if c.pf.TrueColor == RFBTrue {
+        c.R = uint16((pixel >> c.pf.RedShift) & uint32(c.pf.RedMax))
+        c.G = uint16((pixel >> c.pf.GreenShift) & uint32(c.pf.GreenMax))
+        c.B = uint16((pixel >> c.pf.BlueShift) & uint32(c.pf.BlueMax))
+    } else {
+        *c = c.cm[pixel]
+        c.cmIndex = pixel
+    }
 
-	return nil
+    return nil
 }
 
 type SetColorMapEntries struct {

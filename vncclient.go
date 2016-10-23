@@ -3,12 +3,10 @@
 package vnc
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"log"
 	"net"
-	"reflect"
 
 	"github.com/kward/go-vnc/go/metrics"
 	"golang.org/x/net/context"
@@ -258,45 +256,20 @@ func (c *ClientConn) receive(data interface{}) error {
 }
 
 // receiveN receives N packets from the network.
-func (c *ClientConn) receiveN(data interface{}, n int) error {
-	if n == 0 {
-		log.Println("warn: receiveN requested no data")
-		return nil
-	}
+func (c *ClientConn) readInt32Msg(b *[]int32) error {
+    if err := binary.Read(c.c, binary.BigEndian, b); err != nil {
+        return err
+    }
+	c.metrics["bytes-received"].Adjust(int64(binary.Size(b)))
+    return nil
+}
 
-	switch data.(type) {
-	case *[]uint8:
-		var v uint8
-		for i := 0; i < n; i++ {
-			if err := binary.Read(c.c, binary.BigEndian, &v); err != nil {
-				return err
-			}
-			slice := data.(*[]uint8)
-			*slice = append(*slice, v)
-		}
-	case *[]int32:
-		var v int32
-		for i := 0; i < n; i++ {
-			if err := binary.Read(c.c, binary.BigEndian, &v); err != nil {
-				return err
-			}
-			slice := data.(*[]int32)
-			*slice = append(*slice, v)
-		}
-	case *bytes.Buffer:
-		var v byte
-		for i := 0; i < n; i++ {
-			if err := binary.Read(c.c, binary.BigEndian, &v); err != nil {
-				return err
-			}
-			buf := data.(*bytes.Buffer)
-			buf.WriteByte(v)
-		}
-	default:
-		return NewVNCError(fmt.Sprintf("unrecognized data type %v", reflect.TypeOf(data)))
-	}
-	c.metrics["bytes-received"].Adjust(int64(binary.Size(data)))
-	return nil
+func (c *ClientConn) readByteMsg(b *[]byte) error {
+    if err := binary.Read(c.c, binary.BigEndian, b); err != nil {
+        return err
+    }
+	c.metrics["bytes-received"].Adjust(int64(binary.Size(b)))
+    return nil
 }
 
 // send a packet to the network.
