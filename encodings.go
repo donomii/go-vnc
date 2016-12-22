@@ -70,15 +70,12 @@ func (e *RawEncoding) Marshal() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func convert(data []byte, pf *PixelFormat) (r,b,g,a uint8) {
-// TODO(kward): Put back once TestFramebufferUpdate can handle this.
-    // if len(data) == 0 {
-    // 	return NewVNCError(fmt.Sprint("Could not unmarshal empty data slice"))
-    // }
+func convert(data []byte, pf *PixelFormat) (r,g,b,a uint8) {
     a=255
     order := pf.order()
 
     var pixel uint32
+    pixel = 0
     switch pf.BPP {
     case 8:
         pixel = uint32(data[0])
