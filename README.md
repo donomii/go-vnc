@@ -7,14 +7,12 @@ This library implements [RFC 6143][RFC6143] -- The Remote Framebuffer Protocol
 ## Project links
 * Build Status:  [![Build Status][CIStatus]][CIProject]
 * Documentation: [![GoDoc][GoDocStatus]][GoDoc]
-* Views:         [![views][SGViews]][SGProject] [![views_24h][SGViews24h]][SGProject]
-* Users:         [![library users][SGUsers]][SGProject] [![dependents][SGDependents]][SGProject]
 
 ## Setup
 1. Download software and supporting packages.
 
     ```
-    $ go get github.com/kward/go-vnc
+    $ go get github.com/donomii/go-vnc
     $ go get golang.org/x/net
     ```
 
